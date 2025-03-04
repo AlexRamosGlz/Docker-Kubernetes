@@ -1,0 +1,17 @@
+FROM node:23-alpine	# Los Dockerfiles deben empezar por una FORM instruction, FROM es usado para descargar la base image, en otras palabras nuestra imagen se creara a partir de una ya existente, en este caso la de NodeJS
+
+COPY package.json /app/ 	# la instruccion COPY es usada para copiar archivos y/o directorios del HOST a el COTAINER, en este caso se copiara el archivo "package.josn" y se guardara en el directorio /app/ del container
+	
+	# * mientras que RUN es ejectudao en el container COPY es ejecutado en el host *, COPY <fuente> <destion> #
+
+COPY src /app/ 	# copiamos todo lo que este dentro del directorio "src" y lo guardamos en el directorio "/app/" del container
+
+WORKDIR /app/	# la instruccion WORKDIR es usada para setear el directorio de trabajo donde se ejecutaran los siguientes comandos
+	
+	# * Es equivalente a usa "cd" para cambiar al directorio donde queramos correr los comandos * #
+
+RUN npm install 	# la instruccion RUN es usada para correr un comando de shell DENTRO del container
+
+CMD [ "node", "server.js" ]	# la instruccion CMD es usada para ejecutar el comando dentro de los "[]" una ves que el container esta siendo ejecutado
+
+	# * solo puede haber una instruccion CMD en el Dockerfile, CMD [ "command" "parameter" "OPTION", "etc..."] * #

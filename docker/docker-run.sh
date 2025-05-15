@@ -26,3 +26,9 @@ dcoker run -d -p 9000:80 nginx:1.23	# la opcion "-p o --publish", conecta el por
 ## Agregar un nombre a nuestro container
 
 docker run -d -p 8000:80 --name web-app nginx:1.23	# la opcion "--name" nos deja nombrar al container que vamos a crear, en este caso el nombre seria "web-app"
+
+# Correr un contenedor nuevo de forma interactiva
+
+docker run -it visitor /bin/bash
+
+	# las opcion -i

@@ -32,3 +32,9 @@ docker run -d -p 8000:80 --name web-app nginx:1.23	# la opcion "--name" nos deja
 docker run -it visitor /bin/bash
 
 	# las opcion -i
+
+# Correr un contenedor, acceder a su terminal y despues eliminar el contenedor despus de terminar el proceso
+
+docker container run --rm -tip 900:900 nginx:alpine sh
+
+	# la opcion --rm hace que cuando el contenedor se pare, tambien sera eliminado

@@ -1,5 +1,0 @@
-FROM ubuntu:latest
-
-ENTRYPOINT [ "hostname" ]
-
-CMD ["-u"]

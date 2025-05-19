@@ -27,6 +27,10 @@ WORKDIR /app/
 	
 	# * Es equivalente a usa "cd" para cambiar al directorio donde queramos correr los comandos * #
 
+VOLUME /path/to/volume
+
+	# la stanza VOLUME indica el path en donde se el volumen (data persitente) del contianer
+
 EXPOSE 3000
 
 	# EXPOSE expone el puerto en la virtual network de docker es necesaria la opcion -p o -P

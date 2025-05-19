@@ -38,3 +38,10 @@ docker run -it visitor /bin/bash
 docker container run --rm -tip 900:900 nginx:alpine sh
 
 	# la opcion --rm hace que cuando el contenedor se pare, tambien sera eliminado
+
+# Nombrar y crear volumenes
+
+docker container run -d --name mysql -e MYSQL_ALLOW_EMPTY_PASSWOD=True -v mysql-db:/var/lib/mysql mysql
+
+	# "-v mysql-db:/var/lib/mysql " nombre el volumen como "mysql-db" y lo monta en el path "/var/lib/mysql"
+	# del container

@@ -1,0 +1,40 @@
+version: "2"
+
+services:
+  drupal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: custom-drupal
+    ports:
+      - "8080:80"
+    volumes:
+      - drupal-modules:/var/www/html/modules
+      - drupal-profiles:/var/www/html/profiles
+      - drupal-sites:/var/www/html/sites
+      - drupal-themes:/var/www/html/themes
+    networks:
+      - compose-assignment-2-network
+
+  mariadb:
+    image: mariadb
+    networks:
+      - compose-assignment-2-network
+    environment:
+      - MARIADB_USER=admin
+      - MARIADB_PASSWORD=12345
+      - MARIADB_ROOT_PASSWORD=12345
+      - MARIADB_DATABASE=test
+    volumes:
+      - drupal-data:/var/lib/postgress/data
+
+volumes:
+  drupal-modules:
+  drupal-profiles:
+  drupal-sites:
+  drupal-themes:
+  drupal-data:
+
+networks:
+  compose-assignment-2-network:
+    driver: bridge

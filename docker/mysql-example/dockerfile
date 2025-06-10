@@ -1,0 +1,9 @@
+FROM mysql:latest
+
+COPY ./dump-init.sh /home/
+
+COPY ./visitor-dump.sql /home
+
+RUN chmod 755 /home/dump-init.sh
+
+CMD ["mysqld", "hola"]

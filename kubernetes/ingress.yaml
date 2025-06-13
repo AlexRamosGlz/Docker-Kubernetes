@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: ingress
+metadata:
+  name: myapp-ingress
+spec:
+  rules:
+    - host: my-app
+
+        # Los request que sean hechos a "my-app" host seran redirigidos
+        # al internal service
+
+      http:
+        paths:
+          - backend:
+              serviceName: myapp-internal-service
+
+                # Este es el service a donde todo el trafico sera redirigido del ingress
+              servicePort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-internal-service
+spec:
+  selector:
+    app: myapp
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

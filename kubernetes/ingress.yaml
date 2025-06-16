@@ -1,30 +1,70 @@
 apiVersion: networking.k8s.io/v1
-kind: ingress
+kind: Ingress
 metadata:
-  name: myapp-ingress
+  name: visitor-ingress
+  namespace: default
 spec:
   rules:
-    - host: my-app
+    - host:
+        visitor.com
 
-        # Los request que sean hechos a "my-app" host seran redirigidos
+        # Los request que sean hechos a "visitor" host seran redirigidos
         # al internal service
+        #
+        # Mapear domain name al IP del nodo que hara la funcion de entrypoint
 
       http:
         paths:
-          - backend:
-              serviceName: myapp-internal-service
+          - pathType: Prefix
+            path: "/"
+            backend:
+              # "backend" es basicamente el target a donde el trafico es redirigido
 
-                # Este es el service a donde todo el trafico sera redirigido del ingress
-              servicePort: 8080
+              service:
+                # El "service" tiene que conincidir con el nombre del Service al que se esta
+                # apuntando
+
+                name: visitor-service
+                port:
+                  number: 3000
+          - pathType: Prefix
+            path: "/test"
+            backend:
+              service:
+                name: test-service
+                port:
+                  number: 80
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: myapp-internal-service
+  name: visitor-service
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: 3000
+  selector:
+    app: visitor
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: visitor-deploy
+  namespace: default
 spec:
   selector:
-    app: myapp
-  ports:
-    - protocol: TCP
-      port: 8080
-      targetPort: 8080
+    matchLabels:
+      app: visitor
+  template:
+    metadata:
+      labels:
+        app: visitor
+    spec:
+      containers:
+        - name: visitor
+          image: alexramosglz/visitor
+          ports:
+            - containerPort: 3000

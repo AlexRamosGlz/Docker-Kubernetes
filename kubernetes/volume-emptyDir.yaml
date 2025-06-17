@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mc1
+spec:
+  volumes:
+    # Los Volumes proveen una forma de leer, escribir y compartir data
+    # entre contenedores dentro de los Pods
+    #
+
+    - name: html
+      emptyDir:
+        {}
+
+        # Para el tipo de volumen "emptyDir", el volumen es creado cuando el pod es
+        # assignado a un nodo, todos los contenedors del Pod pueden leer y escribir
+        # en el volumen
+        #
+        #     - El volumen puede montarse en el mismo path o diferente en cada -
+        #                              container
+        #
+        # Este tipo de volume dura lo mismo que el Pod
+        #
+
+  containers:
+    - name: 1st
+      image: nginx
+      volumeMounts:
+        # EL "volumeMount" implica el montaje del volumen declarado en un contenedor
+        # del mismo POD
+        #
+
+        - name: html
+
+          # EL nombre tiene que coincidir con el volumen elegido
+
+          mountPath: /usr/share/nginx/html
+
+          # EL "mountPath" puede ser diferente entre contenedores del mismo Pod
+
+    - name: 2nd
+      image: debian
+      volumeMounts:
+        - name: html
+          mountPath: /html
+      command: ["/bin/sh", "-c"]
+      args:
+      - while true; do
+          date >> /html/index.html;
+          sleep 5;
+        done

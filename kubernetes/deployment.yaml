@@ -19,6 +19,14 @@ spec:
 ---
 apiVersion: apps/v1
 kind: Deployment
+
+    # "ReplicaSet" tiene un gran problema, una vez que asignas sus pods, no puedes
+    # cambiar el template de los pods.  
+    #
+    # "Deployment" resuelve este problema. "Deployment" usa "ReplicaSet" para administrar los pods
+    # y al mismo timepo permite actuialzarlos de una manera controlada
+    #
+    
 metadata:
   name: test-deployment
 spec:
@@ -38,7 +46,7 @@ spec:
 
           # Las labels son usadas para identificar tu resource
           #
-          #   kubectl get pods -l app=test-app
+          #   kubectl get pods -l app=test-app --show-labels
           #
           #   el comando filtra los pods con la label "app=test-app"
     spec:

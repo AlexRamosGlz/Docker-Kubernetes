@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+
+    # "ReplicaSet" se asegura de mantener un grupo estable de 
+    # Pods de replica corriendo en cualquier momento
+
+metadata:
+  name: nginx-rs
+  labels:
+    rs: nginx-rs
+    app: nginx-app
+spec:
+  replicas: 4
+
+    # "replicas" es el numero de pods a generar
+    #
+    # El autoscale sirve de la siguiente maneta:
+    #
+    #   kubectl autoscale rs nginx-rs --max=5
+    #
+    # "autoscale" usa Horizontal Pod Autoscaler (HPA) para ajustar el numero de replicas
+    # cuando la carga del CPU aumenta, cuando la carga disminuye, el numero de replicas
+    # no puede disminuir del numero de replica pods delcarados
+
+  selector:
+    matchLabels:
+      app: nginx-app
+
+       # replicaset selecciona los pods basados en el match "app: nginx-app"
+  template:
+
+    # Para poder crear Pods, por si uno fallta o se elimina.
+    #
+    # El template es una plantilla que describe los pods que se van a crear
+
+    metadata:
+      name: nginx-pod
+      labels: 
+        app: nginx-app
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  labels:
+    app: nginx-app
+spec:
+  containers:
+    - name: nginx
+      image: nginx:latest
+      ports:
+        - containerPort: 80

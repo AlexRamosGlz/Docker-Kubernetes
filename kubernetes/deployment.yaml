@@ -12,7 +12,6 @@ spec:
       targetPort: 80
       nodePort: 30001
   selector:
-    app:
       test-deploy
 
       # Los selectors son identificadores para linkear el Service o Deployments con

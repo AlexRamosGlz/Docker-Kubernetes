@@ -1,0 +1,171 @@
+apiVersion: v1
+kind:
+  ConfigMap
+
+  # los "ConfigMap" son objetos de Kubernetes que permiten almacenar datos de configuración
+  # en un formato key-value. Esto en contraste con "Secrets", que hacen lo mismo pero encriptando
+  # los datos.
+  #
+  # Los ConfigMap son las .env de Kubernetes
+  #
+
+metadata:
+  name: my-configmap
+  labels:
+    configmap: my-configmap
+    app: visitor
+data:
+  DATABASE_URL: "some-database-url"
+  API_KEY: "some-api-key"
+  LOG_LEVEL:
+    "info"
+
+    # No solo se pueden alamcenar variables de entorno, sino que también se pueden
+    # almacenar archivos de configuración como valores de la variable...
+    #
+    #     config.json: |
+    #      {
+    #       "setting1": "value1",
+    #        "setting2": "value2"
+    #      }
+    #
+    # sino que tmabien comandos de shell, como por ejemplo un script de inicio de una base de datos
+    # SQL...
+    #     init.sql: |-
+    #      INSER INTO users (name, email) VALUES ('example', 'example.com');
+    #
+
+immutable: true
+
+  # este campo es opcional, pero si se establece a true, el ConfigMap no puede ser modificado
+  # una vez creado. Esto es útil para evitar cambios accidentales en la configuración.
+  #
+
+# otra forma de definir un ConfigMap es atraves del comando...
+#
+#   kubectl create configmap my-configmap --from-literal=DATABASE_URL=some-database-url --from-literal=API_KEY
+#
+# o crear un ConfigMap a partir de un archivo...
+#
+#  kubectl create configmap my-configmap --from-file=mongodb.txt
+#
+
+---
+######################################################
+###                                                 ##
+###                                                 ##
+### - Usar ConfigMap en un Pod como env variables - ##
+###                                                 ##
+###                                                 ##
+######################################################
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+  labels:
+    app: test-pod
+spec:
+  containers:
+    - name: my-container
+      image: my-image
+      env:
+        # Se puede usar un ConfigMap para definir variables de entorno
+        # de un container
+        #
+
+        - name: DATABASE_URL
+          valueFrom:
+            # "valueFrom" es usado para referenciar valores de un resource de k8s
+            # como un ConfigMap o un Secret.
+            #
+
+            configMapKeyRef:
+              # "configMapKeyRef" es usado para referenciar un ConfigMap
+              # y una clave específica dentro de ese ConfigMap.
+              #
+
+              name: my-configmap
+              key: DATABASE_URL
+        - name: API_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: my-configmap
+              key: API_KEY
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: my-configmap
+              key: LOG_LEVEL
+      resources:
+        requests:
+          memory: "64Mi"
+          cpu: "250m"
+        limits:
+          memory: "128Mi"
+          cpu: "500m"
+      ports:
+        - containerPort: 80
+
+# tambien se puede utilizar el campo envFrom para cargar todas las variables de entorno
+# de un ConfigMap, de esta forma no es necesario especificar cada variable
+#
+#       containers:
+#       - name: mongodb
+#         image: mongo:latest
+#         ports:
+#         - containerPort: 27017
+#         envFrom:
+#         - configMapRef:
+#             name: mongodb-config
+---
+##############################################################
+###                                                         ##
+###                                                         ##
+### - Usar ConfigMap en un Deployment montado como volume - ##
+###                                                         ##
+###                                                         ##
+##############################################################
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+  labels:
+    app: test-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-deployment
+  template:
+    metadata:
+      labels:
+        app: test-deployment
+    spec:
+      containers:
+        - name: my-container
+          image: debian
+          ports:
+            - containerPort: 3000
+          env:
+            - name: MONGO_DB_CONFIG_FILKE
+              value: "/etc/config/mongo-db-config.json"
+          volumeMounts:
+            # Se puede montar un ConfigMap como un volume en un container
+            # de esta forma el si se actualiza el ConfigMap mientras que el container
+            # está corriendo, el container tomara los nuevos valores inmediatamente
+            #
+            - name: config-volume
+              mountPath: "/etc/config"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+      volumes:
+        - name: config-volume
+          configMap:
+            name: my-configmap

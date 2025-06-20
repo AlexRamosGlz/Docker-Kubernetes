@@ -2,6 +2,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: test-service
+  labels:
+    app: test-deploy
+    service: test-service
 spec:
   type: NodePort
   ports:
@@ -9,7 +12,8 @@ spec:
       targetPort: 80
       nodePort: 30001
   selector:
-    app: test-deploy
+    app:
+      test-deploy
 
       # Los selectors son identificadores para linkear el Service o Deployments con
       # sus pods y otros resources correspondientes
@@ -18,21 +22,32 @@ spec:
       # (node placement)
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind:
+  Deployment
 
-    # "ReplicaSet" tiene un gran problema, una vez que asignas sus pods, no puedes
-    # cambiar el template de los pods.  
-    #
-    # "Deployment" resuelve este problema. "Deployment" usa "ReplicaSet" para administrar los pods
-    # y al mismo timepo permite actuialzarlos de una manera controlada
-    #
-    
+  # "ReplicaSet" tiene un gran problema, una vez que asignas sus pods, no puedes
+  # cambiar el template de los pods.
+  #
+  # "Deployment" resuelve este problema. "Deployment" usa "ReplicaSet" para administrar los pods
+  # y al mismo timepo permite actuialzarlos de una manera controlada
+  #
+
 metadata:
   name: test-deployment
+  labels:
+    app: test-deploy
 spec:
+  replicas:
+    3
+
+    # Como en el replica set, el deplyment puede crear Pod replicas, y tambien se puede escalar
+    # scalara de forma declarativa, por ejemplo:
+    #
+    #   kubectl scale deployment test-deployment --replicas=5
+    #
+
   selector:
     matchLabels:
-
       # Tanto el selector del "Service" como este, seleccionan pods basados en el match
       # "app: test-deploy", esto siginifica que dentro del template (donde se hacne las plantillas de los pods)
       # el label "app: test-deploy" tiene que estar declarado asi nuestros resources (Service, Deployment)
@@ -42,7 +57,8 @@ spec:
   template:
     metadata:
       labels:
-        app: test-deploy
+        app:
+          test-deploy
 
           # Las labels son usadas para identificar tu resource
           #
@@ -52,6 +68,27 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: nginx:latest
+          image:
+            nginx:latest
+
+            # Hacer rolling updates en un deployment tanto se puede usar el comando...
+            #
+            #     kubectl set image deployment/test-deployment nginx=nginx:1.19
+            #
+            # O con el comando...
+            #
+            #     kubectl edit -f deployment.yaml
+            #
+            # Editas el arcvhivo, cambias la imagen y en automatico se hace la actualizacion
           ports:
             - containerPort: 80
+
+
+# para hacer rollback de una actualizacion, puedes usar el comando...
+#
+#     kubectl rollout undo deployment/test-deployment
+#
+# Kubernetes por default usa una estragegia para mantener por lo menos 25%
+# de los pods disponibles durante una actualizacion, no termina Pods viejos a menos
+# que halla suficientes Pods nuevos corriendo y disponibles. atraves de este algoritmo
+# la aplicacion siempre esta disponible durante una actualizacion

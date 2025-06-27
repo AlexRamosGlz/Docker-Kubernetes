@@ -1,0 +1,122 @@
+#########################################################################
+##                                                                     ##
+##                            Service: ClusterIP                       ##
+##                                                                     ##
+#########################################################################
+apiVersion: v1
+kind:
+  Service
+
+  # Es una abstracion que define un conjunto de Pods y una política
+  # para acceder a ellos
+  #
+  # "Service" actua como una capa sobre los Pods. siempre esta al tanto
+  # de los Pods que maneja: su cuenta, su internal IP, sus puertos expuestos,
+  # etc.
+  #
+
+metadata:
+  name: my-nginx-service
+  labels:
+    run: my-nginx
+spec:
+  type: ClusterIP
+
+    # El tipo "ClusterIP" es el tipo por defecto, y expone el servicio
+    # en una IP interna del cluster. Este tipo de servicio es accesible
+    # solo desde dentro del cluster.
+    #
+
+  ports:
+    - port: 80
+
+      # El campo "port" es el Abstract Service Port, que es el puerto
+      # que que otros Pods o servicios pueden usar para acceder a este servicio.
+      #
+
+      protocol:
+        TCP
+
+        # El campo "protocol" se refiere al IP protocol que se usara
+        # para el puerto.
+        #
+
+      targetPort:
+        80
+
+        # es el port donde el container acepta trafico
+        #
+
+  selector:
+    run: my-nginx
+---
+#########################################################################
+##                                                                     ##
+##                            Service: NodePort                        ##
+##                                                                     ##
+#########################################################################
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-nginx-service-nodeport
+  labels:
+    svc: my-nginx-nodeport
+spec:
+  type:
+    NodePort
+
+    # El tipo "NodePort" expone el servicio en un puerto especifico
+    #
+
+  selector:
+    svc: my-nginx-nodeport
+  ports:
+    - port: 233
+
+        # EL cliente accede al servicio a traves de este puerto "233" y el Service
+        # se encarga de redirigir el trafico al Pod que este escuchando en
+        # el puerto especificado en "targetPort" (80).
+        #
+      
+      targetPort: 3000
+      nodePort:
+        30001
+
+        # "nodePort" se refiere al puerto de cada nodo en el que se
+        # expone este servicio. Este puerto es el que se usa para acceder
+        # al servicio desde fuera del cluster.
+        
+        # De esta forma el trafico externo puede acceder al servicio atraves del
+        # IP del nodo y el puerto especificado en "nodePort".
+
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-nginx-pod
+  labels:
+    app: my-nginx
+    run: my-nginx
+spec:
+  containers:
+    - name: frontend
+      image: nginx:latest
+      ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-nginx-pod-nodeport
+  labels:
+    app: my-nginx-nodeport
+    svc: my-nginx-nodeport
+spec:
+  containers:
+    - name: frontend
+      image: alexramosglz/visitor
+      ports:
+        - containerPort: 3000
+---

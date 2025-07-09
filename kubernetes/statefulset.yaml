@@ -45,6 +45,18 @@ spec:
         - name: www
           mountPath: /usr/share/nginx/html
   volumeClaimTemplates:
+
+    # El campo volumeClaimTemplates se usa para crear un PersistentVolumeClaim
+    # para cada pod del Statefulset.
+    #
+    # Un PV (Persistent Volume), es un objecto que deja que los pods accecen a un 
+    # persistente storage device, este esta definido por K8s StorageClass.
+    #
+    # A diferencia de un volume normal, que son transitorios y se eliminan cuando el pod se elimina,
+    # un PV es persistente y puede ser reutilizado por otros pods.
+    #
+    # Un PVC (Persistent Volume Claim) es una peticion de almacenamiento persistente.
+  
   - metadata:
       name: www
     spec:
